@@ -65,10 +65,14 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Mật khẩu không đúng" });
     }
-
-    // Tạo token và trả về
+    // Tạo token
     const token = generateToken(user);
-    res.json({ message: "Đăng nhập thành công", token });
+
+    // Trả về thông tin đăng nhập
+    res.json({
+      message: "Đăng nhập thành công",
+      token,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

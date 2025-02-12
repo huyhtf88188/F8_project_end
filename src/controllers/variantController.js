@@ -33,25 +33,14 @@ export const createVariant = async (req, res) => {
       return res.status(404).json({ error: "Sản phẩm không tồn tại" });
     }
 
-    // Kiểm tra xem các thuộc tính có hợp lệ không
-    // for (let attr of attributes) {
-    //   const attribute = await Attribute.findById(attr.attributeId);
-    //   if (!attribute) {
-    //     return res
-    //       .status(404)
-    //       .json({
-    //         error: `Thuộc tính với ID ${attr.attributeId} không tồn tại`,
-    //       });
-    //   }
-    // }
-
-    // Tạo Variant mới
     const variant = await Variant.create({
       productId,
       attributes,
       stock,
       price,
     });
+    product.variants.push(variant._id);
+    product.save();
 
     res.status(201).json({
       message: "Tạo biến thể sản phẩm thành công",

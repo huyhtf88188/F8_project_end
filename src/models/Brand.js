@@ -19,6 +19,12 @@ const brandSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true, versionKey: false }
 );

@@ -2,11 +2,13 @@ import express from "express";
 import routes from "./src/routers/index.js";
 import connectDB from "./src/config/db.js";
 import env from "./src/config/config.js";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
 
 connectDB();
+app.use(cors());
 
 app.use("/api", routes);
 

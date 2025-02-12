@@ -59,8 +59,7 @@ const productSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-productSchema.plugin(slugMiddleware("name", "slug"));
-
+productSchema.plugin(slugMiddleware(["name", "variants"], "slug"));
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;

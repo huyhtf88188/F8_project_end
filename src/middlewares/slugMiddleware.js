@@ -10,7 +10,7 @@ const slugMiddleware = (sourceField, targetField) => {
     schema.pre("save", async function (next) {
       // Kiểm tra xem đã có slug chưa, nếu chưa thì tạo mới
       if (!this[targetField] && this[sourceField]) {
-        let slug = slugify(`${this[sourceField]}-${this._id}`, {
+        let slug = slugify(`${this[sourceField]}-${this._id}}`, {
           lower: true, // Chuyển tất cả thành chữ thường
           strict: true, // Loại bỏ ký tự đặc biệt
           locale: "vi", // Hỗ trợ tiếng Việt
@@ -29,7 +29,6 @@ const slugMiddleware = (sourceField, targetField) => {
         // 	existingDoc = await this.constructor.findOne({ [targetField]: slug });
         // 	counter++;
         // }
-
         this[targetField] = slug;
       }
       next();

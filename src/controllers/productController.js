@@ -49,6 +49,7 @@ export const createProduct = async (req, res) => {
       imageUrl,
       sex,
       brandId,
+      variants,
       categoryId,
     } = req.body;
 
@@ -74,8 +75,14 @@ export const createProduct = async (req, res) => {
       sex,
       brandId,
       categoryId,
+      variants,
       slug,
     });
+
+    await Category.updateOne(
+      { _id: categoryId },
+      { $push: { products: product._id } }
+    );
 
     res.status(201).json({ message: "Sản phẩm đã được tạo", product });
   } catch (error) {
