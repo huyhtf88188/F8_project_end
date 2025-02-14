@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import slugMiddleware from "../middlewares/slugMiddleware.js";
+import { string } from "zod";
 
 const productSchema = new mongoose.Schema(
   {

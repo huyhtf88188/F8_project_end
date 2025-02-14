@@ -24,6 +24,12 @@ const userSchema = new mongoose.Schema(
       default: "member",
       enum: ["member", "admin", "superAdmin"],
     },
+    token: {
+      type: String,
+    },
+    exp: {
+      type: String,
+    },
   },
   {
     versionKey: false,
