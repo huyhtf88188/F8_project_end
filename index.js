@@ -3,12 +3,19 @@ import routes from "./src/routers/index.js";
 import connectDB from "./src/config/db.js";
 import env from "./src/config/config.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
 
 connectDB();
-app.use(cors());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Frontend URL
+    credentials: true, // Cho phép gửi cookies & headers
+  })
+);
 
 app.use("/api", routes);
 

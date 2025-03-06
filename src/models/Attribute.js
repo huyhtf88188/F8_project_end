@@ -6,12 +6,10 @@ const attributeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    values: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    values: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "ValueAttribute" }],
+      default: [], // Khởi tạo mặc định là một mảng rỗng
+    },
   },
   { timestamps: true, versionKey: false }
 );

@@ -5,7 +5,7 @@ const variantSchema = new mongoose.Schema(
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
-      required: true,
+      // required: true,
     },
     attributes: [
       {
@@ -13,7 +13,10 @@ const variantSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Attribute",
         },
-        value: { type: String, required: true },
+        valueId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ValueAttribute",
+        },
       },
     ],
     stock: {
@@ -27,6 +30,11 @@ const variantSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
+
+variantSchema.pre(/^find/, function (next) {
+  this.populate("attributes.attributeId", "name"); // Chỉ lấy field `name` từ `Attribute`
+  next();
+});
 
 const Variant = mongoose.model("Variant", variantSchema);
 

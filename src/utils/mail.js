@@ -9,15 +9,6 @@ const {
   SMTP_SECRET,
   SMTP_USERNAME,
 } = env;
-console.log(
-  SMTP_PASSWORD,
-  SMTP_PORT,
-  SMTP_HOST,
-  SMTP_OF_MY,
-  SMTP_SECRET,
-  SMTP_USERNAME,
-  "------------------------------------"
-);
 
 export const transporter = nodemailer.createTransport({
   host: `${SMTP_HOST}`,

@@ -3,18 +3,27 @@ import Variant from "./../models/Variant.js";
 
 export const getVariantsByProductId = async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log(id);
+    const { productId } = req.params;
 
-    const variants = await Variant.find({ id })
+    const variants = await Variant.find({ productId: productId })
       .populate("productId", "name")
-      .populate("attributes.attributeId", "name");
+      .populate("attributes.attributeId", "name")
+      .populate("attributes.valueId", "name");
 
     if (!variants || variants.length === 0) {
       return res
         .status(404)
         .json({ error: "Không có biến thể nào cho sản phẩm này" });
     }
+    res.status(200).json(variants);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAllVariant = async (req, res) => {
+  try {
+    const variants = await Variant.find();
 
     res.status(200).json(variants);
   } catch (error) {
@@ -27,7 +36,6 @@ export const createVariant = async (req, res) => {
   try {
     const { productId, attributes, stock, price } = req.body;
 
-    // Kiểm tra xem sản phẩm có tồn tại không
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ error: "Sản phẩm không tồn tại" });

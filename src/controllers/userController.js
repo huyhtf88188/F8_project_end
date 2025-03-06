@@ -3,16 +3,15 @@ import jwt, { decode } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { sendMailTo } from "../utils/mail.js";
 
-Tạo JWT Token
-const generateToken = (user) => {
+const generateToken = (user, time) => {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
+    expiresIn: time,
   });
 };
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}, "-password"); // Không trả về password
+    const users = await User.find({}, "-password");
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -36,15 +35,15 @@ export const registerUser = async (req, res) => {
       name,
       phone,
     });
+
+    newUser.password = undefined;
     try {
       const mail = await sendMailTo(email, "aloha", "olaho");
       console.log(mail);
     } catch (error) {
       console.log(error);
     }
-    res
-      .status(201)
-      .json({ message: "Đăng ký thành công, hãy xác thực email", newUser });
+    res.status(201).json({ message: "Đăng ký thành công", newUser });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -63,11 +62,18 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Mật khẩu không đúng" });
     }
-    const token = generateToken(user);
+    const accessToken = generateToken(user, "10d");
+    const refeshToken = generateToken(user, "10d");
+
+    res.cookie("refeshToken", refeshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+    });
 
     res.json({
       message: "Đăng nhập thành công",
-      token,
+      accessToken,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -109,10 +115,10 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy email" });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "300s",
+      expiresIn: "10d",
     });
     user.token = token;
-
+    user.exp = Date.now() + 15 * 60 * 1000;
     await user.save();
 
     const link = `http://localhost:5173/auth/forgot-password/${token}`;
@@ -136,21 +142,32 @@ export const resetPassword = async (req, res) => {
     }
 
     const user = await User.findById(decoded.id);
-    const exp = decoded.id.exp;
-
-    if (!user) {
+    if (!user || user.token !== token || Date.now() > user.exp) {
       return res
         .status(400)
-        .json({ error: "Token không hợp lệ hoặc đã hết hạn" });
+        .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
     }
-
-    // Mã hóa mật khẩu mới
-    user.password = await bcrypt.hash(password, 10);
-    user.resetPasswordToken = undefined;
-    // user.resetPasswordExpire = undefined;
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.token = null;
+    user.exp = null;
     await user.save();
 
     res.status(200).json({ message: "Mật khẩu đã được đặt lại thành công" });
+  } catch (error) {
+    res.status(500).json({ error: "Lỗi server, vui lòng thử lại" });
+  }
+};
+
+export const getProfile = async (req, res) => {
+  try {
+    // Lấy ID của user từ token
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ error: "Không tìm thấy người dùng" });
+    }
+
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: "Lỗi server, vui lòng thử lại" });
   }

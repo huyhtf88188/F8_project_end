@@ -17,7 +17,6 @@ const productSchema = new mongoose.Schema(
     },
     totalStock: {
       type: Number,
-      required: true,
     },
     imageUrl: {
       type: String,
@@ -26,7 +25,6 @@ const productSchema = new mongoose.Schema(
     },
     sex: {
       type: String,
-      required: true,
       enum: ["male", "unisex", "female"],
       default: "unisex",
     },
@@ -50,17 +48,12 @@ const productSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    variants: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Variant",
-      },
-    ],
+    variants: [{ type: mongoose.Schema.Types.ObjectId, ref: "Variant" }],
   },
   { timestamps: true, versionKey: false }
 );
 
-productSchema.plugin(slugMiddleware(["name", "variants"], "slug"));
+productSchema.plugin(slugMiddleware(["name"], "slug"));
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;

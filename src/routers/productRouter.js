@@ -4,17 +4,21 @@ import {
   deleteProduct,
   getAllProducts,
   getProductById,
+  getVariant,
+  softdeleteProduct,
   updateProduct,
 } from "../controllers/productController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 import { validateIdMongo } from "../middlewares/validateIdMongo.js";
 
-const router = express.Router();
+const productRouter = express.Router();
 
-router.get("/", getAllProducts);
-router.get("/:id", validateIdMongo, getProductById);
-router.post("/", protect, createProduct);
-router.put("/:id", protect, validateIdMongo, updateProduct);
-router.delete("/:id", protect, validateIdMongo, deleteProduct);
+productRouter.get("/", getAllProducts);
+productRouter.get("/:id", validateIdMongo, getProductById);
+productRouter.post("/", protect, createProduct);
+productRouter.put("/:id", validateIdMongo, protect, updateProduct);
+productRouter.delete("/:id", protect, validateIdMongo, deleteProduct);
+productRouter.put("/:id", protect, validateIdMongo, softdeleteProduct);
+productRouter.get("/get_stock/:id", getVariant);
 
-export default router;
+export default productRouter;

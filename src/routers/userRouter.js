@@ -7,12 +7,14 @@ import {
   deleteUser,
   forgotPassword,
   resetPassword,
+  getProfile,
 } from "../controllers/userController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
 const userRouter = express.Router();
 
 userRouter.get("/", protect, getAllUsers); // Chỉ Admin mới có quyền
+userRouter.get("/profile", protect, getProfile);
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.put("/profile/:id", updateUser);
