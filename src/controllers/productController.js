@@ -34,12 +34,22 @@ export const getProductById = async (req, res) => {
     const product = await Product.findById(id)
       .populate("brandId", "name")
       .populate("categoryId", "name")
-      .populate("variants")
-      .populate("variants.attributes.valueId", "name");
+      .populate({
+        path: "variants",
+        populate: {
+          path: "attributes.valueId",
+          select: "name",
+        },
+      });
 
     if (!product) {
       return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
     }
+
+    product.totalStock = product.variants?.reduce(
+      (sum, v) => sum + (v.stock || 0),
+      0
+    );
 
     res.status(200).json(product);
   } catch (error) {
@@ -358,57 +368,22 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-export const getVariant = async (req, res) => {
+export const searchProducts = async (req, res) => {
   try {
-    const { id } = req.params;
-    const productID = new mongoose.Types.ObjectId(id);
-    const idColor = new mongoose.Types.ObjectId(req.body.idColor);
-    const idSize = new mongoose.Types.ObjectId(req.body.idSize);
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ error: "Query không hợp lệ" });
+    }
 
-    const data = await Product.aggregate([
-      {
-        $match: { _id: productID }, // Lọc sản phẩm theo ID
-      },
-      {
-        $unwind: "$variants", // Tách từng phần tử trong `variants`
-      },
-      {
-        $match: {
-          "variants.attributes": {
-            $all: [
-              {
-                $elemMatch: {
-                  "attributeId.name": "Color",
-                  "valueId._id": idColor,
-                },
-              },
-              {
-                $elemMatch: {
-                  "attributeId.name": "Size",
-                  "valueId._id": idSize,
-                },
-              },
-            ],
-          },
-        },
-      },
+    const products = await Product.find({
+      name: { $regex: q, $options: "i" },
+      isHidden: false,
+    })
+      .populate("brandId", "name")
+      .populate("categoryId", "name");
 
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          "variants._id": 1,
-          "variants.price": 1,
-          "variants.stock": 1,
-          "variants.attributes": 1,
-        },
-      },
-    ]);
-
-    console.log(data);
-    res.json(data);
+    res.status(200).json({ results: products });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Lỗi server", error });
+    res.status(500).json({ error: error.message });
   }
 };

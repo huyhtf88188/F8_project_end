@@ -1,4 +1,6 @@
+import Attribute from "../models/Attribute.js";
 import Product from "../models/Product.js";
+import ValueAttribute from "../models/valueAttribute.js";
 import Variant from "./../models/Variant.js";
 
 export const getVariantsByProductId = async (req, res) => {
@@ -41,30 +43,54 @@ export const createVariant = async (req, res) => {
       return res.status(404).json({ error: "Sản phẩm không tồn tại" });
     }
 
+    // Kiểm tra và xử lý attributes
+    let processedAttributes = [];
+    for (const attr of attributes) {
+      const attribute = await Attribute.findById(attr.attributeId);
+      const valueAttr = await ValueAttribute.findById(attr.valueId);
+
+      if (!attribute || !valueAttr) {
+        return res
+          .status(404)
+          .json({ error: "Không tìm thấy thuộc tính hoặc giá trị." });
+      }
+
+      processedAttributes.push({
+        attributeId: { _id: attribute._id, name: attribute.name },
+        valueId: { _id: valueAttr._id, name: valueAttr.name },
+        _id: attr._id,
+      });
+    }
+
     const variant = await Variant.create({
       productId,
-      attributes,
+      attributes: processedAttributes,
       stock,
       price,
     });
+
     product.variants.push(variant._id);
-    product.save();
+    await product.save();
+
+    // Populate the variant to include attribute and value names
+    const populatedVariant = await Variant.findById(variant._id)
+      .populate("attributes.attributeId", "name")
+      .populate("attributes.valueId", "name");
 
     res.status(201).json({
       message: "Tạo biến thể sản phẩm thành công",
-      variant,
+      variant: populatedVariant,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
-// Cập nhật biến thể sản phẩm
 export const updateVariant = async (req, res) => {
   try {
     const { productId } = req.params;
     console.log(productId);
     const { stock, price, attributes } = req.body;
+    console.log(req.body);
 
     const variant = await Variant.findById(productId);
     if (!variant) {

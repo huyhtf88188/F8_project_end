@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import jwt, { decode } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { sendMailTo } from "../utils/mail.js";
+import { createCart } from "./cartController.js";
 
 const generateToken = (user, time) => {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -28,6 +29,7 @@ export const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(hashedPassword);
 
     const newUser = await User.create({
       email,
@@ -36,15 +38,21 @@ export const registerUser = async (req, res) => {
       phone,
     });
 
-    newUser.password = undefined;
+    const cartId = await createCart(newUser._id);
+    console.log("===================================", cartId._id);
+    newUser.cartId = cartId._id;
+    console.log("===================================", newUser.cartId);
+    newUser.save();
     try {
       const mail = await sendMailTo(email, "aloha", "olaho");
       console.log(mail);
     } catch (error) {
       console.log(error);
     }
+    newUser.password = undefined;
     res.status(201).json({ message: "Đăng ký thành công", newUser });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -64,7 +72,7 @@ export const loginUser = async (req, res) => {
     }
     const accessToken = generateToken(user, "10d");
     const refeshToken = generateToken(user, "10d");
-
+    user.password = undefined;
     res.cookie("refeshToken", refeshToken, {
       httpOnly: true,
       secure: false,
@@ -74,24 +82,8 @@ export const loginUser = async (req, res) => {
     res.json({
       message: "Đăng nhập thành công",
       accessToken,
+      user,
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const updateUser = async (req, res) => {
-  try {
-    const id = req.user.id;
-    const { name, phone } = req.body;
-
-    const updatedUser = await User.findByIdAndUpdate(
-      { _id: id },
-      { name, phone },
-      { new: true, select: "-password" }
-    );
-
-    res.status(200).json({ message: "Cập nhật thành công", updatedUser });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -160,15 +152,31 @@ export const resetPassword = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    // Lấy ID của user từ token
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
 
     if (!user) {
       return res.status(404).json({ error: "Không tìm thấy người dùng" });
     }
-
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: "Lỗi server, vui lòng thử lại" });
+    console.log(error);
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const { name, phone } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: id },
+      { name, phone },
+      { new: true, select: "-password" }
+    );
+
+    res.status(200).json({ message: "Cập nhật thành công", updatedUser });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

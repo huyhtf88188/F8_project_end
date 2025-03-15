@@ -28,6 +28,7 @@ const productSchema = new mongoose.Schema(
       enum: ["male", "unisex", "female"],
       default: "unisex",
     },
+
     brandId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Brand",

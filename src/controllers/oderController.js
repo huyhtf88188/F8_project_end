@@ -1,3 +1,4 @@
+// controllers/oderController.js
 import Order from "../models/Oder.js";
 import Product from "../models/Product.js";
 
@@ -26,12 +27,11 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// Tạo đơn hàng (User)
 export const createOrder = async (req, res) => {
   try {
     const { userId, orderDetails, paymentMethod } = req.body;
 
-    // Kiểm tra danh sách sản phẩm có hợp lệ không
+    // Kiểm tra sản phẩm có tồn tại không
     let totalPrice = 0;
     for (let item of orderDetails) {
       const product = await Product.findById(item.productId);
@@ -40,7 +40,8 @@ export const createOrder = async (req, res) => {
           .status(404)
           .json({ error: `Sản phẩm với ID ${item.productId} không tồn tại` });
       }
-      totalPrice += product.basePrice * item.quantity;
+      // Sử dụng price từ req.body thay vì product.basePrice
+      totalPrice += item.price * item.quantity;
     }
 
     // Tạo đơn hàng
@@ -56,11 +57,11 @@ export const createOrder = async (req, res) => {
       order: newOrder,
     });
   } catch (error) {
+    console.error("Error in createOrder:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Cập nhật đơn hàng (Admin)
 export const updateOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -71,7 +72,9 @@ export const updateOrder = async (req, res) => {
     const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      {
+        new: true,
+      }
     );
     res.status(200).json({
       message: "Cập nhật đơn hàng thành công",

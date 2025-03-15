@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
     exp: {
       type: String,
     },
+    cartId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cart",
+    },
   },
   {
     versionKey: false,

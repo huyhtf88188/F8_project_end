@@ -7,19 +7,9 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    totalPrice: {
-      type: Number,
-      required: true,
-    },
-    orderDate: {
-      type: Date,
-      default: Date.now,
-    },
-    paymentMethod: {
-      type: String,
-      enum: ["COD", "Bank", "Momo", "VNPay"],
-      required: true,
-    },
+    totalPrice: { type: Number, required: true },
+    orderDate: { type: Date, default: Date.now },
+    paymentMethod: { type: String, enum: ["COD"], required: true },
     orderDetails: [
       {
         productId: {
@@ -27,14 +17,8 @@ const orderSchema = new mongoose.Schema(
           ref: "Product",
           required: true,
         },
-        quantity: {
-          type: Number,
-          required: true,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
       },
     ],
   },
