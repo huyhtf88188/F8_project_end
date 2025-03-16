@@ -18,9 +18,9 @@ userRouter.get("/", protect, getAllUsers); // Chỉ Admin mới có quyền
 userRouter.get("/profile", protect, getProfile);
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
-userRouter.put("/profile/:id", updateUser);
-userRouter.post("/forgot-password/", protect, forgotPassword);
-userRouter.post("/reset-password/", protect, resetPassword);
-userRouter.delete("/:id", protect, deleteUser);
+userRouter.put("/profile", protect, updateUser);
+userRouter.post("/forgot-password", protect, forgotPassword); // Xóa dấu / thừa
+userRouter.post("/reset-password", protect, resetPassword); // Xóa dấu / thừa
+userRouter.delete("/:id", protect, validateIdMongo, deleteUser); // Thêm validateIdMongo nếu cần
 
 export default userRouter;

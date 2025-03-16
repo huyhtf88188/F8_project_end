@@ -17,10 +17,9 @@ cartRouter.get("/", protect, getCart);
 cartRouter.post("/add", protect, addToCart);
 
 // Cập nhật số lượng sản phẩm trong giỏ hàng
-cartRouter.put("/update", protect, updateCartItem);
+cartRouter.patch("/update", protect, updateCartItem);
 
 // Xóa sản phẩm khỏi giỏ hàng
-
-// Xóa toàn bộ giỏ hàng
+cartRouter.delete("/remove", protect, removeFromCart);
 
 export default cartRouter;

@@ -9,6 +9,7 @@ import bannerRouter from "./banerRouter.js";
 import productRouter from "./productRouter.js";
 import valueAttributeRouter from "./valueAttributeRouter.js";
 import cartRouter from "./cartRouter.js";
+import paymentRouter from "./paymentRouter.js";
 
 const routes = Router();
 routes.use("/products", productRouter);
@@ -21,5 +22,6 @@ routes.use("/attributes", attributeRouter);
 routes.use("/banner", bannerRouter);
 routes.use("/value-attribute", valueAttributeRouter);
 routes.use("/cart", cartRouter);
+routes.use("/payment", paymentRouter);
 
 export default routes;
